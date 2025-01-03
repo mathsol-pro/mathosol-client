@@ -111,7 +111,8 @@ export class MathsolClient {
 
     async queryMetadata(pda: PublicKey) {
         const accInfo = await this.connection.getAccountInfo(pda);
-        return accInfo && Metadata.deserialize(accInfo.data, 0)[0];
+        const metadata = accInfo && Metadata.deserialize(accInfo.data, 0)[0];
+        return metadata;
     }
 
     async queryCollectionMetadata() {

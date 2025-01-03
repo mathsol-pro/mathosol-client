@@ -1,3 +1,4 @@
+import { LuckyBox } from "./lucky-box";
 import { MathsolClient } from "./sdk/sdk";
 import * as bs58 from "bs58";
 import { privateKey } from "./key.json";
@@ -10,20 +11,11 @@ main().catch((error) => {
 });
 
 async function main() {
-    await runDevnet();
-}
-
-async function runDevnet() {
     const client = MathsolClient.fromEndpoint("https://api.devnet.solana.com");
     const user = Keypair.fromSecretKey(bs58.decode(privateKey));
-    const fairLaunch = new FailrLaunch(client, "https://abi.mathsol.pro");
-    await fairLaunch.run(user);
-}
+    // const fairLaunch = new FailrLaunch(client, "https://api.mathsol.pro");
+    // await fairLaunch.run(user);
 
-async function runMainnet() {
-    const client = MathsolClient.fromEndpoint("https://api.mainnet-beta.solana.com");
-    const user = Keypair.fromSecretKey(bs58.decode(privateKey));
-    const fairLaunch = new FailrLaunch(client, "https://api.mathsol.pro");
-    console.log("user", user.publicKey.toBase58());
-    await fairLaunch.run(user);
+    const luckyBox = new LuckyBox(client);
+    await luckyBox.run(user, user.publicKey);
 }

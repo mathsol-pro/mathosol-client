@@ -15,7 +15,7 @@ export class MathsolClient {
     public eventParser: EventParser;
     public endpoint: string;
 
-    public static programId: string = "4Mhnc3XvRMEbKYns84dhtEgPjA9ZATcwgDGb2dNdARmF";
+    public static programId: string = "B7jtde64natBhpeiRNWPnWwJnKXupLg8vKdy5yBzGL5V";
 
     public static fromEndpoint(endpoint: string) {
         const program = new Program(
@@ -85,7 +85,8 @@ export class MathsolClient {
     }
 
     async luckyBoxInitialize(admin: Keypair, signer: PublicKey, mintStartTime: BN, swapStartTime: BN, seedNftCount: BN) {
-        return await this.program.methods
+        console.log("luckyBoxInitialize start", { admin, signer, mintStartTime, swapStartTime, seedNftCount });
+        const transaction = await this.program.methods
             .luckyBoxInitialize(signer, mintStartTime, swapStartTime, seedNftCount)
             .accounts({
                 admin: admin.publicKey,
@@ -93,20 +94,22 @@ export class MathsolClient {
                 rent: SYSVAR_RENT_PUBKEY,
                 systemProgram: SystemProgram.programId,
             })
-            .signers([admin])
-            .rpc();
+            .transaction();
+        const transferTransaction = new anchor.web3.Transaction().add(transaction);
+        return await anchor.web3.sendAndConfirmTransaction(this.connection, transferTransaction, [admin], { skipPreflight: true });
     }
 
     async luckyBoxUpdate(admin: Keypair, signer: PublicKey, mintStartTime: BN, swapStartTime: BN, seedNftCount: BN) {
-        return await this.program.methods
+        const transaction = await this.program.methods
             .luckyBoxUpdate(signer, mintStartTime, swapStartTime, seedNftCount)
             .accounts({
                 admin: admin.publicKey,
                 luckyBoxAccount: this.findLuckyBoxAccountPDA(),
                 systemProgram: SystemProgram.programId,
             })
-            .signers([admin])
-            .rpc();
+            .transaction();
+        const transferTransaction = new anchor.web3.Transaction().add(transaction);
+        return await anchor.web3.sendAndConfirmTransaction(this.connection, transferTransaction, [admin], { skipPreflight: true });
     }
 
     async queryMetadata(pda: PublicKey) {
@@ -176,6 +179,7 @@ export class MathsolClient {
     }
 
     async luckyBoxMintNft(user: Keypair, referrer: PublicKey) {
+        console.log("lucyBoxMintNft start");
         const collectionPDA = this.findCollectionPDA();
         const mint = anchor.web3.Keypair.generate();
         const metadataPDA = this.findMetadataPDA(mint.publicKey);
@@ -185,7 +189,7 @@ export class MathsolClient {
         const collectionMasterEditionPDA = this.findMasterEditionPDA(collectionPDA);
         const modifyComputeUnits = anchor.web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 40_0000 });
 
-        const method = this.program.methods.luckyBoxMintNft(referrer).accounts({
+        const method = this.program.methods.luckyBoxMintNft().accounts({
             user: user.publicKey,
             luckyBoxAccount: this.findLuckyBoxAccountPDA(),
             userAccount: this.findLuckyBoxUserAccountPDA(user.publicKey),
@@ -197,6 +201,7 @@ export class MathsolClient {
             masterEdition: masterEditionPDA,
             tokenAccount: tokenAccount,
             tokenMetadataProgram: METADATA_PROGRAM_ID,
+            referrer,
         });
         // return await method.signers([user, mint]).rpc({ skipPreflight: true });
         const transferTransaction = new anchor.web3.Transaction().add(modifyComputeUnits, await method.transaction());
@@ -229,28 +234,24 @@ export class MathsolClient {
     }
 
     async fairLaunchInitialize(admin: Keypair, signer: PublicKey, startTime: BN, drawPrice: BN, solRefundAmount: BN, tokenClaimAmount: BN) {
-        return await this.program.methods
-            .fairLaunchInitialize(signer, startTime, drawPrice, solRefundAmount, tokenClaimAmount)
-            .accounts({
-                admin: admin.publicKey,
-                fairLaunchAccount: this.findFairLaunchAccountPDA(),
-                rent: SYSVAR_RENT_PUBKEY,
-                systemProgram: SystemProgram.programId,
-            })
-            .signers([admin])
-            .rpc();
+        const method = await this.program.methods.fairLaunchInitialize(signer, startTime, drawPrice, solRefundAmount, tokenClaimAmount).accounts({
+            admin: admin.publicKey,
+            fairLaunchAccount: this.findFairLaunchAccountPDA(),
+            rent: SYSVAR_RENT_PUBKEY,
+            systemProgram: SystemProgram.programId,
+        });
+        const t = new anchor.web3.Transaction().add(await method.transaction());
+        return await anchor.web3.sendAndConfirmTransaction(this.connection, t, [admin], { skipPreflight: true });
     }
 
     async fairLaunchUpdate(admin: Keypair, signer: PublicKey, startTime: BN, drawPrice: BN, solRefundAmount: BN, tokenClaimAmount: BN) {
-        return await this.program.methods
-            .fairLaunchUpdate(signer, startTime, drawPrice, solRefundAmount, tokenClaimAmount)
-            .accounts({
-                admin: admin.publicKey,
-                fairLaunchAccount: this.findFairLaunchAccountPDA(),
-                systemProgram: SystemProgram.programId,
-            })
-            .signers([admin])
-            .rpc();
+        const method = await this.program.methods.fairLaunchUpdate(signer, startTime, drawPrice, solRefundAmount, tokenClaimAmount).accounts({
+            admin: admin.publicKey,
+            fairLaunchAccount: this.findFairLaunchAccountPDA(),
+            systemProgram: SystemProgram.programId,
+        });
+        const t = new anchor.web3.Transaction().add(await method.transaction());
+        return await anchor.web3.sendAndConfirmTransaction(this.connection, t, [admin], { skipPreflight: true });
     }
 
     async fairLaunchGetInitializeUserTransaction(user: PublicKey) {
@@ -406,17 +407,15 @@ export class MathsolClient {
     }
 
     async fairLaunchEmergencyWithdraw(admin: Keypair, to: PublicKey, amount: BN) {
-        return await this.program.methods
-            .fairLaunchEmergencyWithdraw(amount)
-            .accounts({
-                admin: admin.publicKey,
-                vaultAccount: this.findFairLaunchValultAccountPDA(),
-                fairLaunchAccount: this.findFairLaunchAccountPDA(),
-                recipientAccount: to,
-                systemProgram: SystemProgram.programId,
-            })
-            .signers([admin])
-            .rpc();
+        const method = await this.program.methods.fairLaunchEmergencyWithdraw(amount).accounts({
+            admin: admin.publicKey,
+            vaultAccount: this.findFairLaunchValultAccountPDA(),
+            fairLaunchAccount: this.findFairLaunchAccountPDA(),
+            recipientAccount: to,
+            systemProgram: SystemProgram.programId,
+        });
+        const t = new anchor.web3.Transaction().add(await method.transaction());
+        return await anchor.web3.sendAndConfirmTransaction(this.connection, t, [admin], { skipPreflight: true });
     }
 
     async queryFairLaunchAccount() {

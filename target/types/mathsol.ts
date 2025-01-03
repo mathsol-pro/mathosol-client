@@ -306,6 +306,16 @@ export type Mathsol = {
           "isSigner": false
         },
         {
+          "name": "referrer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -321,22 +331,12 @@ export type Mathsol = {
           "isSigner": false
         },
         {
-          "name": "tokenMetadataProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "rent",
           "isMut": false,
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "referrer",
-          "type": "publicKey"
-        }
-      ]
+      "args": []
     },
     {
       "name": "luckyBoxSwap",
@@ -1468,6 +1468,16 @@ export const IDL: Mathsol = {
           "isSigner": false
         },
         {
+          "name": "referrer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -1483,22 +1493,12 @@ export const IDL: Mathsol = {
           "isSigner": false
         },
         {
-          "name": "tokenMetadataProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "rent",
           "isMut": false,
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "referrer",
-          "type": "publicKey"
-        }
-      ]
+      "args": []
     },
     {
       "name": "luckyBoxSwap",

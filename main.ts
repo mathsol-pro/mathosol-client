@@ -13,6 +13,7 @@ main().catch((error) => {
 async function main() {
     const client = MathsolClient.fromEndpoint("https://api.devnet.solana.com");
     const user = Keypair.fromSecretKey(bs58.decode(privateKey));
+    console.log("user", user.publicKey.toBase58());
     // const fairLaunch = new FailrLaunch(client, "https://api.mathsol.pro");
     // await fairLaunch.run(user);
 
